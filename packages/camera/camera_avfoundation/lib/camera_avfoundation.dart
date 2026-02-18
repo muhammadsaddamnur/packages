@@ -3,3 +3,7 @@
 // found in the LICENSE file.
 
 export 'src/avfoundation_camera.dart';
+export 'src/messages.g.dart'
+    show
+        PlatformPrimaryConstituentDeviceSwitchingBehavior,
+        PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition;

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:camera_avfoundation/camera_avfoundation.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -64,10 +65,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   late Animation<double> _exposureModeControlRowAnimation;
   late AnimationController _focusModeControlRowAnimationController;
   late Animation<double> _focusModeControlRowAnimation;
+  late AnimationController _switchingBehaviorControlRowAnimationController;
+  late Animation<double> _switchingBehaviorControlRowAnimation;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentScale = 1.0;
   double _baseScale = 1.0;
+
+  // The current primary constituent device switching behavior (iOS 15+ only).
+  PlatformPrimaryConstituentDeviceSwitchingBehavior _currentSwitchingBehavior =
+      PlatformPrimaryConstituentDeviceSwitchingBehavior.auto;
 
   // Counting pointers (number of user fingers on screen)
   int _pointers = 0;
@@ -101,6 +108,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       parent: _focusModeControlRowAnimationController,
       curve: Curves.easeInCubic,
     );
+    _switchingBehaviorControlRowAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _switchingBehaviorControlRowAnimation = CurvedAnimation(
+      parent: _switchingBehaviorControlRowAnimationController,
+      curve: Curves.easeInCubic,
+    );
   }
 
   @override
@@ -108,6 +123,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     WidgetsBinding.instance.removeObserver(this);
     _flashModeControlRowAnimationController.dispose();
     _exposureModeControlRowAnimationController.dispose();
+    _focusModeControlRowAnimationController.dispose();
+    _switchingBehaviorControlRowAnimationController.dispose();
     super.dispose();
   }
 
@@ -310,11 +327,21 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   ? onCaptureOrientationLockButtonPressed
                   : null,
             ),
+            // iOS-only: primary constituent device switching behavior.
+            if (!kIsWeb && Platform.isIOS)
+              IconButton(
+                icon: const Icon(Icons.switch_camera),
+                color: Colors.blue,
+                onPressed: controller != null
+                    ? onSwitchingBehaviorButtonPressed
+                    : null,
+              ),
           ],
         ),
         _flashModeControlRowWidget(),
         _exposureModeControlRowWidget(),
         _focusModeControlRowWidget(),
+        if (!kIsWeb && Platform.isIOS) _switchingBehaviorControlRowWidget(),
       ],
     );
   }
@@ -495,6 +522,87 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     style: styleLocked,
                     onPressed: controller != null
                         ? () => onSetFocusModeButtonPressed(FocusMode.locked)
+                        : null,
+                    child: const Text('LOCKED'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Display a panel to control the primary constituent device switching
+  /// behavior (iOS 15+ only).
+  Widget _switchingBehaviorControlRowWidget() {
+    return SizeTransition(
+      sizeFactor: _switchingBehaviorControlRowAnimation,
+      child: ClipRect(
+        child: ColoredBox(
+          color: Colors.grey.shade50,
+          child: Column(
+            children: <Widget>[
+              const Center(child: Text('Camera Switching Behavior (iOS 15+)')),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _currentSwitchingBehavior ==
+                              PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                  .auto
+                          ? Colors.orange
+                          : Colors.blue,
+                    ),
+                    onPressed: controller != null
+                        ? () => onSetSwitchingBehaviorButtonPressed(
+                            PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                .auto,
+                          )
+                        : null,
+                    child: const Text('AUTO'),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _currentSwitchingBehavior ==
+                              PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                  .restricted
+                          ? Colors.orange
+                          : Colors.blue,
+                    ),
+                    onPressed: controller != null
+                        ? () => onSetSwitchingBehaviorButtonPressed(
+                            PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                .restricted,
+                            conditions:
+                                const <
+                                  PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+                                >[
+                                  PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+                                      .videoZoomChanged,
+                                ],
+                          )
+                        : null,
+                    child: const Text('RESTRICTED'),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _currentSwitchingBehavior ==
+                              PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                  .locked
+                          ? Colors.orange
+                          : Colors.blue,
+                    ),
+                    onPressed: controller != null
+                        ? () => onSetSwitchingBehaviorButtonPressed(
+                            PlatformPrimaryConstituentDeviceSwitchingBehavior
+                                .locked,
+                          )
                         : null,
                     child: const Text('LOCKED'),
                   ),
@@ -740,6 +848,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _flashModeControlRowAnimationController.forward();
       _exposureModeControlRowAnimationController.reverse();
       _focusModeControlRowAnimationController.reverse();
+      _switchingBehaviorControlRowAnimationController.reverse();
     }
   }
 
@@ -750,6 +859,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _exposureModeControlRowAnimationController.forward();
       _flashModeControlRowAnimationController.reverse();
       _focusModeControlRowAnimationController.reverse();
+      _switchingBehaviorControlRowAnimationController.reverse();
     }
   }
 
@@ -760,6 +870,18 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _focusModeControlRowAnimationController.forward();
       _flashModeControlRowAnimationController.reverse();
       _exposureModeControlRowAnimationController.reverse();
+      _switchingBehaviorControlRowAnimationController.reverse();
+    }
+  }
+
+  void onSwitchingBehaviorButtonPressed() {
+    if (_switchingBehaviorControlRowAnimationController.value == 1) {
+      _switchingBehaviorControlRowAnimationController.reverse();
+    } else {
+      _switchingBehaviorControlRowAnimationController.forward();
+      _flashModeControlRowAnimationController.reverse();
+      _exposureModeControlRowAnimationController.reverse();
+      _focusModeControlRowAnimationController.reverse();
     }
   }
 
@@ -992,6 +1114,55 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
+    }
+  }
+
+  void onSetSwitchingBehaviorButtonPressed(
+    PlatformPrimaryConstituentDeviceSwitchingBehavior behavior, {
+    List<PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>
+        conditions =
+        const <
+          PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+        >[],
+  }) {
+    setSwitchingBehavior(behavior, conditions: conditions).then((_) {
+      if (mounted) {
+        setState(() {
+          _currentSwitchingBehavior = behavior;
+        });
+      }
+      showInSnackBar('Switching behavior set to ${behavior.name}');
+    });
+  }
+
+  Future<void> setSwitchingBehavior(
+    PlatformPrimaryConstituentDeviceSwitchingBehavior behavior, {
+    List<PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>
+        conditions =
+        const <
+          PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+        >[],
+  }) async {
+    if (controller == null) {
+      return;
+    }
+
+    final CameraPlatform cameraInstance = CameraPlatform.instance;
+    if (cameraInstance is! AVFoundationCamera) {
+      showInSnackBar('Switching behavior is only supported on iOS.');
+      return;
+    }
+
+    try {
+      await cameraInstance.setPrimaryConstituentDeviceSwitchingBehavior(
+        behavior,
+        conditions: conditions,
+      );
+    } on CameraException catch (e) {
+      _showCameraException(e);
+      // Don't rethrow — unsupported device returns an error, not a crash.
+    } catch (e) {
+      showInSnackBar('Device does not support camera switching: $e');
     }
   }
 
