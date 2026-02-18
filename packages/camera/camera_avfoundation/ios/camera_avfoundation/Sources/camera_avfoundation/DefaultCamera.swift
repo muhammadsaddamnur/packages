@@ -1017,6 +1017,57 @@ final class DefaultCamera: NSObject, Camera {
     return captureDevice.isVideoStabilizationModeSupported(stabilizationMode)
   }
 
+  func setPrimaryConstituentDeviceSwitchingBehavior(
+    _ behavior: FCPPlatformPrimaryConstituentDeviceSwitchingBehavior,
+    restrictedSwitchingBehaviorConditions conditions:
+      [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition],
+    withCompletion completion: @escaping (FlutterError?) -> Void
+  ) {
+    if #available(iOS 15.0, *) {
+      // The active captureDevice is a constituent (single-lens) device.
+      // setPrimaryConstituentDeviceSwitchingBehavior must be called on the
+      // virtual (multi-lens) device that owns it. Discover it here.
+      let position = captureDevice.avDevice.position
+      let virtualDeviceTypes: [AVCaptureDevice.DeviceType] = [
+        .builtInTripleCamera,
+        .builtInDualWideCamera,
+        .builtInDualCamera,
+      ]
+      let discoverySession = AVCaptureDevice.DiscoverySession(
+        deviceTypes: virtualDeviceTypes,
+        mediaType: .video,
+        position: position)
+      guard let virtualDevice = discoverySession.devices.first else {
+        completion(
+          FlutterError(
+            code: "NOT_VIRTUAL_DEVICE",
+            message:
+              "No virtual (multi-lens) device found for this camera position. "
+              + "setPrimaryConstituentDeviceSwitchingBehavior requires a device with multiple lenses.",
+            details: nil))
+        return
+      }
+      do {
+        try virtualDevice.lockForConfiguration()
+      } catch let error as NSError {
+        completion(DefaultCamera.flutterErrorFromNSError(error))
+        return
+      }
+      virtualDevice.setPrimaryConstituentDeviceSwitchingBehavior(
+        getAVPrimaryConstituentDeviceSwitchingBehavior(behavior),
+        restrictedSwitchingBehaviorConditions: getAVRestrictedSwitchingBehaviorConditions(conditions)
+      )
+      virtualDevice.unlockForConfiguration()
+      completion(nil)
+    } else {
+      completion(
+        FlutterError(
+          code: "UNSUPPORTED_IOS_VERSION",
+          message: "setPrimaryConstituentDeviceSwitchingBehavior requires iOS 15.0 or later",
+          details: nil))
+    }
+  }
+
   func setFlashMode(
     _ mode: FCPPlatformFlashMode,
     withCompletion completion: @escaping (FlutterError?) -> Void

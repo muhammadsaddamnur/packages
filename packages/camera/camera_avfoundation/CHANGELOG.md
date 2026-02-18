@@ -1,3 +1,7 @@
+## 0.10.1
+
+* Adds `setPrimaryConstituentDeviceSwitchingBehavior` to control automatic camera switching on virtual (multi-camera) devices (iOS 15.0+).
+
 ## 0.10.0
 
 * Adds video stabilization.

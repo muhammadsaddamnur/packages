@@ -75,4 +75,49 @@ final class CameraPropertiesTests: XCTestCase {
       FCPPlatformDeviceOrientation.portraitUp,
       getPigeonDeviceOrientation(for: .unknown))
   }
+
+  // MARK: - Primary Constituent Device Switching Behavior Tests
+
+  @available(iOS 15.0, *)
+  func testGetAVPrimaryConstituentDeviceSwitchingBehavior() {
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior.unsupported,
+      getAVPrimaryConstituentDeviceSwitchingBehavior(.unsupported))
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior.auto,
+      getAVPrimaryConstituentDeviceSwitchingBehavior(.auto))
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior.restricted,
+      getAVPrimaryConstituentDeviceSwitchingBehavior(.restricted))
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior.locked,
+      getAVPrimaryConstituentDeviceSwitchingBehavior(.locked))
+  }
+
+  @available(iOS 15.0, *)
+  func testGetAVRestrictedSwitchingBehaviorConditions() {
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions.videoZoomChanged,
+      getAVRestrictedSwitchingBehaviorConditions([.videoZoomChanged]))
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions.focusModeChanged,
+      getAVRestrictedSwitchingBehaviorConditions([.focusChanged]))
+    XCTAssertEqual(
+      AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions
+        .exposureModeChanged,
+      getAVRestrictedSwitchingBehaviorConditions([.exposureChanged]))
+
+    // Test multiple conditions.
+    let combined: AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions = [
+      .videoZoomChanged, .focusModeChanged,
+    ]
+    XCTAssertEqual(
+      combined,
+      getAVRestrictedSwitchingBehaviorConditions([.videoZoomChanged, .focusChanged]))
+
+    // Test empty conditions.
+    XCTAssertEqual(
+      [],
+      getAVRestrictedSwitchingBehaviorConditions([]))
+  }
 }

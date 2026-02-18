@@ -47,6 +47,12 @@ final class MockCamera: NSObject, Camera {
   var setVideoStabilizationModeStub:
     ((FCPPlatformVideoStabilizationMode, (FlutterError?) -> Void) -> Void)?
   var getIsVideoStabilizationModeSupportedStub: ((FCPPlatformVideoStabilizationMode) -> Bool)?
+  var setPrimaryConstituentDeviceSwitchingBehaviorStub:
+    ((
+      FCPPlatformPrimaryConstituentDeviceSwitchingBehavior,
+      [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition],
+      (FlutterError?) -> Void
+    ) -> Void)?
 
   var dartAPI: FCPCameraEventApi? {
     get {
@@ -199,6 +205,15 @@ final class MockCamera: NSObject, Camera {
 
   func isVideoStabilizationModeSupported(_ mode: FCPPlatformVideoStabilizationMode) -> Bool {
     return getIsVideoStabilizationModeSupportedStub?(mode) ?? false
+  }
+
+  func setPrimaryConstituentDeviceSwitchingBehavior(
+    _ behavior: FCPPlatformPrimaryConstituentDeviceSwitchingBehavior,
+    restrictedSwitchingBehaviorConditions conditions:
+      [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition],
+    withCompletion completion: @escaping (FlutterError?) -> Void
+  ) {
+    setPrimaryConstituentDeviceSwitchingBehaviorStub?(behavior, conditions, completion)
   }
 
   func setDescriptionWhileRecording(

@@ -447,6 +447,21 @@ class AVFoundationCamera extends CameraPlatform {
     await _hostApi.setImageFileFormat(_pigeonImageFileFormat(format));
   }
 
+  /// Sets the primary constituent device switching behavior.
+  ///
+  /// This controls automatic camera switching on virtual (multi-camera) devices.
+  /// Only supported on iOS 15.0 or later.
+  Future<void> setPrimaryConstituentDeviceSwitchingBehavior(
+    PlatformPrimaryConstituentDeviceSwitchingBehavior behavior, {
+    List<PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>
+        conditions = const <PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>[],
+  }) async {
+    await _hostApi.setPrimaryConstituentDeviceSwitchingBehavior(
+      behavior,
+      conditions,
+    );
+  }
+
   @override
   Widget buildPreview(int cameraId) {
     return Texture(textureId: cameraId);

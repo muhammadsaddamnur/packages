@@ -78,6 +78,19 @@ enum PlatformVideoStabilizationMode {
   cinematicExtended,
 }
 
+enum PlatformPrimaryConstituentDeviceSwitchingBehavior {
+  unsupported,
+  auto,
+  restricted,
+  locked,
+}
+
+enum PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition {
+  videoZoomChanged,
+  focusChanged,
+  exposureChanged,
+}
+
 // Pigeon version of CameraDescription.
 class PlatformCameraDescription {
   PlatformCameraDescription({
@@ -301,6 +314,14 @@ abstract class CameraApi {
   @async
   @ObjCSelector('isVideoStabilizationModeSupported:')
   bool isVideoStabilizationModeSupported(PlatformVideoStabilizationMode mode);
+
+  /// Sets the primary constituent device switching behavior.
+  @async
+  @ObjCSelector('setPrimaryConstituentDeviceSwitchingBehavior:withRestrictedSwitchingBehaviorConditions:')
+  void setPrimaryConstituentDeviceSwitchingBehavior(
+    PlatformPrimaryConstituentDeviceSwitchingBehavior behavior,
+    List<PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition> conditions,
+  );
 
   /// Pauses streaming of preview frames.
   @async

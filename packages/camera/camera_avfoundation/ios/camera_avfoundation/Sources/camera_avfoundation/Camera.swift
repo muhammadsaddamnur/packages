@@ -108,6 +108,13 @@ protocol Camera: FlutterTexture, AVCaptureVideoDataOutputSampleBufferDelegate,
 
   func isVideoStabilizationModeSupported(_ mode: FCPPlatformVideoStabilizationMode) -> Bool
 
+  func setPrimaryConstituentDeviceSwitchingBehavior(
+    _ behavior: FCPPlatformPrimaryConstituentDeviceSwitchingBehavior,
+    restrictedSwitchingBehaviorConditions conditions:
+      [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition],
+    withCompletion: @escaping (_ error: FlutterError?) -> Void
+  )
+
   func setFlashMode(
     _ mode: FCPPlatformFlashMode,
     withCompletion: @escaping (_ error: FlutterError?) -> Void

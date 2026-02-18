@@ -586,6 +586,37 @@ final class CameraPluginDelegatingMethodTests: XCTestCase {
     XCTAssertTrue(getMaximumExposureOffsetCalled)
   }
 
+  func testSetPrimaryConstituentDeviceSwitchingBehavior_callsCameraSetPrimaryConstituentDeviceSwitchingBehavior(
+  ) {
+    let (cameraPlugin, mockCamera) = createCameraPlugin()
+    let expectation = expectation(description: "Call completed")
+
+    let targetBehavior = FCPPlatformPrimaryConstituentDeviceSwitchingBehavior.locked
+    let targetConditions: [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition] =
+      [.videoZoomChanged, .focusChanged]
+
+    var setCalled = false
+    mockCamera.setPrimaryConstituentDeviceSwitchingBehaviorStub = {
+      behavior, conditions, completion in
+      XCTAssertEqual(behavior, targetBehavior)
+      XCTAssertEqual(conditions, targetConditions)
+      completion(nil)
+      setCalled = true
+    }
+
+    cameraPlugin.setPrimaryConstituentDeviceSwitchingBehavior(
+      targetBehavior,
+      withRestrictedSwitchingBehaviorConditions: targetConditions
+    ) { error in
+      XCTAssertNil(error)
+      expectation.fulfill()
+    }
+
+    waitForExpectations(timeout: 30, handler: nil)
+
+    XCTAssertTrue(setCalled)
+  }
+
   func testGetMinimumExposureOffset_returnsValueFromCameraGetMinimumExposureOffset() {
     let (cameraPlugin, mockCamera) = createCameraPlugin()
     let expectation = expectation(description: "Call completed")

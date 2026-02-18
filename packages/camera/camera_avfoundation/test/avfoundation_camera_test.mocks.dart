@@ -22,6 +22,7 @@ import 'package:mockito/src/dummies.dart' as _i3;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 /// A class which mocks [CameraApi].
 ///
@@ -324,6 +325,24 @@ class MockCameraApi extends _i1.Mock implements _i2.CameraApi {
             returnValueForMissingStub: _i4.Future<bool>.value(false),
           )
           as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> setPrimaryConstituentDeviceSwitchingBehavior(
+    _i2.PlatformPrimaryConstituentDeviceSwitchingBehavior? behavior,
+    List<
+      _i2.PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+    >?
+    conditions,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPrimaryConstituentDeviceSwitchingBehavior, [
+              behavior,
+              conditions,
+            ]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 
   @override
   _i4.Future<void> pausePreview() =>

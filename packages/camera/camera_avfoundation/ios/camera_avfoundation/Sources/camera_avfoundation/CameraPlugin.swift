@@ -537,6 +537,21 @@ extension CameraPlugin: FCPCameraApi {
     }
   }
 
+  public func setPrimaryConstituentDeviceSwitchingBehavior(
+    _ behavior: FCPPlatformPrimaryConstituentDeviceSwitchingBehavior,
+    withRestrictedSwitchingBehaviorConditions conditions:
+      [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorConditionBox],
+    completion: @escaping (FlutterError?) -> Void
+  ) {
+    let unboxedConditions = conditions.map { $0.value }
+    captureSessionQueue.async { [weak self] in
+      self?.camera?.setPrimaryConstituentDeviceSwitchingBehavior(
+        behavior,
+        restrictedSwitchingBehaviorConditions: unboxedConditions,
+        withCompletion: completion)
+    }
+  }
+
   public func pausePreview(completion: @escaping (FlutterError?) -> Void) {
     captureSessionQueue.async { [weak self] in
       self?.camera?.pausePreview()

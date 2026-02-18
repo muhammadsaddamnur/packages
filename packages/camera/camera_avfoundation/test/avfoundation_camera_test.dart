@@ -992,5 +992,60 @@ void main() {
 
       verify(mockApi.setImageFileFormat(PlatformImageFileFormat.jpeg));
     });
+
+    test(
+      'Should set primary constituent device switching behavior',
+      () async {
+        await camera.setPrimaryConstituentDeviceSwitchingBehavior(
+          PlatformPrimaryConstituentDeviceSwitchingBehavior.locked,
+          conditions: <PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>[
+            PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+                .videoZoomChanged,
+          ],
+        );
+
+        final VerificationResult verification = verify(
+          mockApi.setPrimaryConstituentDeviceSwitchingBehavior(
+            captureAny,
+            captureAny,
+          ),
+        );
+        expect(
+          verification.captured[0],
+          PlatformPrimaryConstituentDeviceSwitchingBehavior.locked,
+        );
+        expect(
+          verification.captured[1],
+          <PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition>[
+            PlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition
+                .videoZoomChanged,
+          ],
+        );
+      },
+    );
+
+    test(
+      'Should set primary constituent device switching behavior with default empty conditions',
+      () async {
+        await camera.setPrimaryConstituentDeviceSwitchingBehavior(
+          PlatformPrimaryConstituentDeviceSwitchingBehavior.auto,
+        );
+
+        final VerificationResult verification = verify(
+          mockApi.setPrimaryConstituentDeviceSwitchingBehavior(
+            captureAny,
+            captureAny,
+          ),
+        );
+        expect(
+          verification.captured[0],
+          PlatformPrimaryConstituentDeviceSwitchingBehavior.auto,
+        );
+        expect(
+          verification.captured[1],
+          isEmpty,
+        );
+      },
+    );
   });
 }

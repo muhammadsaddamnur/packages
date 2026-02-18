@@ -105,3 +105,44 @@ func getAvCaptureVideoStabilizationMode(
     return .off
   }
 }
+
+/// Gets AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior from its Pigeon representation.
+@available(iOS 15.0, *)
+func getAVPrimaryConstituentDeviceSwitchingBehavior(
+  _ behavior: FCPPlatformPrimaryConstituentDeviceSwitchingBehavior
+) -> AVCaptureDevice.PrimaryConstituentDeviceSwitchingBehavior {
+  switch behavior {
+  case .unsupported:
+    return .unsupported
+  case .auto:
+    return .auto
+  case .restricted:
+    return .restricted
+  case .locked:
+    return .locked
+  @unknown default:
+    return .unsupported
+  }
+}
+
+/// Gets AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions from its
+/// Pigeon representation.
+@available(iOS 15.0, *)
+func getAVRestrictedSwitchingBehaviorConditions(
+  _ conditions: [FCPPlatformPrimaryConstituentDeviceRestrictedSwitchingBehaviorCondition]
+) -> AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions {
+  var result: AVCaptureDevice.PrimaryConstituentDeviceRestrictedSwitchingBehaviorConditions = []
+  for condition in conditions {
+    switch condition {
+    case .videoZoomChanged:
+      result.insert(.videoZoomChanged)
+    case .focusChanged:
+      result.insert(.focusModeChanged)
+    case .exposureChanged:
+      result.insert(.exposureModeChanged)
+    @unknown default:
+      break
+    }
+  }
+  return result
+}
